@@ -3,29 +3,75 @@ const username = document.getElementById("username");
 const email = document.getElementById("email");
 const password = document.getElementById("password");
 const confirmPassword = document.getElementById("confirmPassword");
+const datalist = document.getElementById("saved-usernames"); 
+
+document.addEventListener("DOMContentLoaded", function() {
+    loadSavedUsernames();
+});
+
+function loadSavedUsernames() {
+    const savedNames = JSON.parse(localStorage.getItem('usernames')) || [];
+    
+    if (datalist) {
+        datalist.innerHTML = '';
+        savedNames.forEach(name => {
+            const option = document.createElement("option");
+            option.value = name;
+            datalist.appendChild(option);
+        });
+    }
+}
 
 form.addEventListener("submit", function(e) {
     e.preventDefault();
 
     const isRequiredValid = checkRequired([username, email, password, confirmPassword]);
 
-    let isFormatValid = isRequiredValid;
+    let isUsernameValid = true;
+    let isEmailValid = true;
+    let isPasswordValid = true;
 
-    if (isRequiredValid) {
-        const isUsernameValid = checkLength(username, 3, 15);
-        const isEmailValid = checkEmail(email);
-        const isPasswordValid = checkLength(password, 6, 25);
-        const isPasswordMatch = checkPasswordMatch(password, confirmPassword);
-
-        isFormatValid = isUsernameValid && isEmailValid && isPasswordValid && isPasswordMatch;
+    if (username.value.trim() !== "") {
+        isUsernameValid = checkLength(username, 3, 15);
+    }
+    
+    if (email.value.trim() !== "") {
+        isEmailValid = checkEmail(email);
     }
 
-    if (isFormatValid) {
+    if (password.value.trim() !== "") {
+        isPasswordValid = checkLength(password, 6, 25);
+    }
+
+    const isPasswordMatch = checkPasswordMatch(password, confirmPassword);
+
+    if (isRequiredValid && isUsernameValid && isEmailValid && isPasswordValid && isPasswordMatch) {
+        
+        const currentName = username.value.trim();
+        let savedNames = JSON.parse(localStorage.getItem('usernames')) || [];
+        
+        if (!savedNames.includes(currentName)) {
+            savedNames.push(currentName);
+            localStorage.setItem('usernames', JSON.stringify(savedNames));
+            loadSavedUsernames(); 
+        } 
+
         alert("Chúc mừng bạn đã đăng ký thành công!");
+        
         form.reset();
         document.querySelectorAll(".form-group").forEach((group) => {
             group.className = "form-group";
         });
+    }
+});
+
+confirmPassword.addEventListener("input", function() {
+    checkPasswordMatch(password, confirmPassword);
+});
+
+password.addEventListener("input", function() {
+    if (confirmPassword.value !== "") {
+        checkPasswordMatch(password, confirmPassword);
     }
 });
 
@@ -45,6 +91,7 @@ function checkRequired(inputArray) {
 }
 
 function formatFieldName(input) {
+    if (input.id === "confirmPassword") return "Xác nhận mật khẩu";
     return input.id.charAt(0).toUpperCase() + input.id.slice(1);
 }
 
@@ -61,10 +108,12 @@ function showSuccess(input) {
 }
 
 function checkLength(input, min, max) {
-    if (input.value.length < min) {
+    const length = input.value.trim().length; 
+
+    if (length < min) {
         showError(input, `${formatFieldName(input)} không thể nhập ít hơn ${min} ký tự`);
         return false;
-    } else if (input.value.length > max) {
+    } else if (length > max) {
         showError(input, `${formatFieldName(input)} chỉ có thể nhập tối đa ${max} ký tự`);
         return false;
     } else {
@@ -80,16 +129,30 @@ function checkEmail(input) {
         showSuccess(input);
         return true;
     } else {
-        showError(input, "Email không hợp lệ (ví dụ: abc@gmail.com");
+        showError(input, "Email không hợp lệ (ví dụ: abc@gmail.com)");
         return false;
     }
 }
 
-function checkPasswordMatch(input1, input2) {
-    if (input1.value !== input2.value) {
+function checkPasswordMatch(input1, input2) {   
+    const pass = input1.value;
+    const confirmPass = input2.value;
+
+    if (confirmPass.trim() === "") {
+        showError(input2, "Vui lòng xác nhận lại mật khẩu");
+        return false;
+    }
+
+    if (pass.trim() === "") {
+        showError(input2, "Vui lòng nhập mật khẩu ở trên trước");
+        return false;
+    }
+
+    if (pass !== confirmPass) {
         showError(input2, "Mật khẩu không trùng nhau");
         return false;
     } else {
+        showSuccess(input2); 
         return true;
     }
 }
