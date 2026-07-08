@@ -1,8 +1,6 @@
-const form = document.getElementById("registration-form");
+const form = document.getElementById("login-form");
 const username = document.getElementById("username");
-const email = document.getElementById("email");
 const password = document.getElementById("password");
-const confirmPassword = document.getElementById("confirmPassword");
 const datalist = document.getElementById("saved-usernames"); 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -23,55 +21,29 @@ function loadSavedUsernames() {
 }
 
 form.addEventListener("submit", function(e) {
-    e.preventDefault();
-
-    const isRequiredValid = checkRequired([username, email, password, confirmPassword]);
+    const isRequiredValid = checkRequired([username, password]);
 
     let isUsernameValid = true;
-    let isEmailValid = true;
     let isPasswordValid = true;
 
     if (username.value.trim() !== "") {
         isUsernameValid = checkLength(username, 3, 15);
     }
     
-    if (email.value.trim() !== "") {
-        isEmailValid = checkEmail(email);
-    }
-
     if (password.value.trim() !== "") {
-        isPasswordValid = checkLength(password, 6, 25);
+        isPasswordValid = checkLength(password, 3, 25);
     }
 
-    const isPasswordMatch = checkPasswordMatch(password, confirmPassword);
-
-    if (isRequiredValid && isUsernameValid && isEmailValid && isPasswordValid && isPasswordMatch) {
-        
+    if (!(isRequiredValid && isUsernameValid && isPasswordValid)) {
+        e.preventDefault(); 
+    } else {
         const currentName = username.value.trim();
         let savedNames = JSON.parse(localStorage.getItem('usernames')) || [];
         
         if (!savedNames.includes(currentName)) {
             savedNames.push(currentName);
             localStorage.setItem('usernames', JSON.stringify(savedNames));
-            loadSavedUsernames(); 
         } 
-
-        alert("Chúc mừng bạn đã đăng ký thành công!");
-        
-        form.reset();
-        document.querySelectorAll(".form-group").forEach((group) => {
-            group.className = "form-group";
-        });
-    }
-});
-
-confirmPassword.addEventListener("input", function() {
-    checkPasswordMatch(password, confirmPassword);
-});
-
-password.addEventListener("input", function() {
-    if (confirmPassword.value !== "") {
-        checkPasswordMatch(password, confirmPassword);
     }
 });
 
@@ -91,7 +63,6 @@ function checkRequired(inputArray) {
 }
 
 function formatFieldName(input) {
-    if (input.id === "confirmPassword") return "Xác nhận mật khẩu";
     return input.id.charAt(0).toUpperCase() + input.id.slice(1);
 }
 
@@ -118,41 +89,6 @@ function checkLength(input, min, max) {
         return false;
     } else {
         showSuccess(input);
-        return true;
-    }
-}
-
-function checkEmail(input) {
-    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    
-    if (emailRegex.test(input.value.trim())) {
-        showSuccess(input);
-        return true;
-    } else {
-        showError(input, "Email không hợp lệ (ví dụ: abc@gmail.com)");
-        return false;
-    }
-}
-
-function checkPasswordMatch(input1, input2) {   
-    const pass = input1.value;
-    const confirmPass = input2.value;
-
-    if (confirmPass.trim() === "") {
-        showError(input2, "Vui lòng xác nhận lại mật khẩu");
-        return false;
-    }
-
-    if (pass.trim() === "") {
-        showError(input2, "Vui lòng nhập mật khẩu ở trên trước");
-        return false;
-    }
-
-    if (pass !== confirmPass) {
-        showError(input2, "Mật khẩu không trùng nhau");
-        return false;
-    } else {
-        showSuccess(input2); 
         return true;
     }
 }

@@ -1,0 +1,6 @@
+controller/LoginServlet.class
+controller/ProductServlet.class
+controller/RegisterServlet.class
+util/DBConnection.class
+dao/ProductDAO.class
+model/Product.class

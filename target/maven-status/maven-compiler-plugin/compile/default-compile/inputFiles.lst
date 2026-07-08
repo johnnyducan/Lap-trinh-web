@@ -1,0 +1,6 @@
+/workspaces/Lap-trinh-web/src/main/java/controller/LoginServlet.java
+/workspaces/Lap-trinh-web/src/main/java/controller/ProductServlet.java
+/workspaces/Lap-trinh-web/src/main/java/controller/RegisterServlet.java
+/workspaces/Lap-trinh-web/src/main/java/dao/ProductDAO.java
+/workspaces/Lap-trinh-web/src/main/java/model/Product.java
+/workspaces/Lap-trinh-web/src/main/java/util/DBConnection.java
